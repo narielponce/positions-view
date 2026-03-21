@@ -1,0 +1,40 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/position-view-backend
+  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/position-view-frontend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # 🔧 Backend
+      - name: Build backend image
+        run: docker build -t $IMAGE_BACKEND:latest ./backend
+
+      - name: Push backend image
+        run: docker push $IMAGE_BACKEND:latest
+
+      # 🌐 Frontend
+      - name: Build frontend image
+        run: docker build -t $IMAGE_FRONTEND:latest ./frontend
+
+      - name: Push frontend image
+        run: docker push $IMAGE_FRONTEND:latest
