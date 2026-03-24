@@ -1,10 +1,13 @@
 import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.api import planos_router, puntos_router
 from app.config import settings
 
 app = FastAPI(title=settings.APP_NAME, redirect_slashes=False)
+
+app.mount("/api/uploads", StaticFiles(directory="/app/uploads"), name="uploads")
 
 UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)

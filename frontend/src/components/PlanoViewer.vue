@@ -330,9 +330,18 @@ function onContainerClick(e) {
   if (isPanning.value) return
   if (puntoClickHandled.value) return
   
-  const rect = containerRef.value.getBoundingClientRect()
-  const x = (e.clientX - rect.left) / rect.width
-  const y = (e.clientY - rect.top) / rect.height
+  const container = containerRef.value
+  const zoomContainer = zoomContainerRef.value
+  const rect = zoomContainer.getBoundingClientRect()
+  
+  const centerX = rect.width / 2 + rect.left
+  const centerY = rect.height / 2 + rect.top
+  
+  const relX = e.clientX - centerX - translateX.value
+  const relY = e.clientY - centerY - translateY.value
+  
+  const x = (relX / scale.value / container.offsetWidth) + 0.5
+  const y = (relY / scale.value / container.offsetHeight) + 0.5
   
   if (x >= 0.02 && x <= 0.98 && y >= 0.02 && y <= 0.98) {
     emit('create-punto', { x, y })
@@ -668,16 +677,20 @@ defineExpose({ centerOnPunto })
 .punto.router {
   background: #1565C0;
   border-radius: 50%;
-  position: relative;
 }
 
 .punto.router::before {
   content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 40%;
   height: 40%;
   background: white;
   border-radius: 50%;
   opacity: 0.3;
+  pointer-events: none;
 }
 
 @media (min-width: 768px) {
